@@ -1,0 +1,12 @@
+{
+  "actions" : {
+    "run" : {
+      "enabled" : true,
+      "script" : "cp $FILE \/Volumes\/CIRCUITPY\/code.py"
+    }
+  },
+  "environment" : {
+    "FILE" : "${FileRelative}"
+  },
+  "identifier" : "1F20EEF4-0400-4277-9214-982E417B2396"
+}
