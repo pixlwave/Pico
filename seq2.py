@@ -1,3 +1,9 @@
+# written for circuitpython v6.2.0
+# requires the follow libs:
+# - adafruit_bus_device
+# - adafruit_dotstar
+# - adafruit_midi
+
 import board
 import time
 import random
