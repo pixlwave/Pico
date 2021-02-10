@@ -63,7 +63,6 @@ class Color:
     
     MAJOR = (0, 0, 192)
     SCALE = (0, 63, 63)
-    # ACCIDENTAL = (63, 0, 63)
     ACCIDENTAL = (63, 0, 63)
     
     CHANNEL = (127, 127, 0)
@@ -71,7 +70,14 @@ class Color:
     
     MARKER = (16, 16, 16)
     NOTE = (255, 255, 255)
+    NOTE_OFF = (7, 0, 0)
     OFF = (0, 0, 0)
+
+
+class Note:
+    OFF = 0
+    ON = 1
+    HOLD = 2
 
 
 def dim_color(color):
@@ -82,8 +88,10 @@ def dim_color(color):
 step = 0
 note = 0
 channel = 0
-pattern = [[[False] * 16 for _ in range(16)] * 16 for _ in range(16)]
+pattern = [[[Note.OFF] * 16 for _ in range(16)] * 16 for _ in range(16)]
 button_map = [12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3]
+next_melody_note = [Note.ON, Note.HOLD, Note.OFF]
+next_drum_note = [Note.ON, Note.OFF]
 
 drum_note_colors = [Color.KICK, Color.SNARE, Color.SNARE, Color.CLAP,
                     Color.SNARE, Color.TOM, Color.HIHAT, Color.TOM,
@@ -94,6 +102,7 @@ melody_note_colors = [Color.MAJOR, Color.ACCIDENTAL, Color.SCALE, Color.ACCIDENT
                       Color.MAJOR, Color.SCALE, Color.ACCIDENTAL, Color.MAJOR,
                       Color.ACCIDENTAL, Color.SCALE, Color.ACCIDENTAL, Color.SCALE,
                       Color.MAJOR, Color.ACCIDENTAL, Color.SCALE, Color.ACCIDENTAL]
+melody_hold_note_colors = [dim_color(color) for color in melody_note_colors]
 dim_notes = [False] * 16
 
 button_mode = ButtonMode.PATTERN
@@ -166,34 +175,38 @@ def button_press(index, state):
         if index == 15:
             if state == ButtonState.LONGPRESSED:
                 for i in range(16):
-                    dim_notes[i] = any(n for n in pattern[channel][button_map[i]])
+                    dim_notes[i] = any(n == Note.ON for n in pattern[channel][button_map[i]])
                 button_mode = ButtonMode.NOTE_CHOOSER
             elif state == ButtonState.RELEASED:
-                pattern[channel][note][15] = not pattern[channel][note][15]
+                toggle_note(index)
         elif index == 12:
             if state == ButtonState.LONGPRESSED:
                 button_mode = ButtonMode.CHANNEL_CHOOSER
             elif state == ButtonState.RELEASED:
-                pattern[channel][note][12] = not pattern[channel][note][12]
+                toggle_note(index)
         elif index == 3 and state == ButtonState.LONGPRESSED:
             reset()
         else:
             if state == ButtonState.PRESSED:
-                pattern[channel][note][index] = not pattern[channel][note][index]
+                toggle_note(index)
 
 
-def play_notes(step):
+def toggle_note(index):
+    global pattern
+    if channel == 9:
+        pattern[channel][note][index] = next_drum_note[pattern[channel][note][index]]
+    else:
+        pattern[channel][note][index] = next_melody_note[pattern[channel][note][index]]
+
+
+def update_notes(lastStep, step):
     for _channel in range(16):
         for _note in range(16):
-            if pattern[_channel][_note][step]:
+            if pattern[_channel][_note][step] == Note.ON:
                 midi[_channel].send(NoteOn(36 + _note, 120))
-
-
-def stop_notes(step):
-    for _channel in range(16):
-        for _note in range(16):
-            if pattern[_channel][_note][step]:
-                midi[_channel].send(NoteOff(36 + _note, 120))
+            elif pattern[_channel][_note][step] == Note.OFF:
+                if pattern[_channel][_note][lastStep] != Note.OFF:
+                    midi[_channel].send(NoteOff(36 + _note, 120))
 
 
 def reset_notes():
@@ -209,7 +222,7 @@ def reset():
     
     note = 0
     channel = 9
-    pattern = [[[False] * 16 for _ in range(16)] * 16 for _ in range(16)]
+    pattern = [[[Note.OFF] * 16 for _ in range(16)] * 16 for _ in range(16)]
     
     reset_notes()
 
@@ -217,13 +230,18 @@ def reset():
 def update_leds():
     if button_mode == ButtonMode.PATTERN:
         for i in range(16):
-            is_armed = pattern[channel][note][i]
+            noteType = pattern[channel][note][i]
             if i == step:
-                pixels[i] = Color.NOTE if is_armed else Color.MARKER
+                pixels[i] = Color.NOTE if noteType == Note.ON else Color.MARKER
             elif channel == 9:
-                pixels[i] = drum_note_colors[note] if is_armed else Color.OFF
+                pixels[i] = drum_note_colors[note] if noteType == Note.ON else Color.OFF
             else:
-                pixels[i] = melody_note_colors[note] if is_armed else Color.OFF
+                if noteType == Note.ON:
+                    pixels[i] = melody_note_colors[note]
+                elif noteType == Note.HOLD:
+                    pixels[i] = melody_hold_note_colors[note]
+                else:
+                    pixels[i] = Color.NOTE_OFF
     elif button_mode == ButtonMode.NOTE_CHOOSER:
         for i in range(16):
             if channel == 9:
@@ -244,7 +262,7 @@ reset_notes()
 
 # main loop
 while True:
-    stop_notes(step)
+    lastStep = step
     step = (step + 1) % 16
-    play_notes(step)
-    wait(0.115)
+    update_notes(lastStep, step)
+    wait(0.105)
