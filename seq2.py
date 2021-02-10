@@ -122,9 +122,9 @@ def wait(delay):
                     button_press(i, ButtonState.PRESSED)
                 elif button_states[i] == 1:
                     if last_button_pressed_times[i] + 0.5 < now:
-                        button_press(i, ButtonState.LONGPRESSED, now)
+                        button_press(i, ButtonState.LONGPRESSED)
                 elif button_states[i] == 0 and last_button_states[i] == 1:
-                    button_press(i, ButtonState.RELEASED, now)
+                    button_press(i, ButtonState.RELEASED)
                     last_button_pressed_times[i] = None
         
         last_button_states = button_states
