@@ -36,7 +36,7 @@ i2c = busio.I2C(board.GP5, board.GP4)
 device = I2CDevice(i2c, 0x20)
 
 # midi setup
-midi = adafruit_midi.MIDI(midi_out=usb_midi.ports[1], out_channel=0)
+midi = adafruit_midi.MIDI(midi_out=usb_midi.ports[1], out_channel=9)
 
 
 # enums
