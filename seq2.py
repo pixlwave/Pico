@@ -1,5 +1,6 @@
+# usb midi step sequencer for raspberry pi pico
 # written for circuitpython v6.2.0
-# requires the follow libs:
+# requires the following libs:
 # - adafruit_bus_device
 # - adafruit_dotstar
 # - adafruit_midi
@@ -101,7 +102,7 @@ def read_button_states():
 
 
 def wait(delay):
-    updateLEDs()
+    update_leds()
     
     global button_mode
     global last_button_states
@@ -167,7 +168,7 @@ def stopNotes(step):
             midi.send(NoteOff(36 + i, 120))
 
 
-def resetNotes():
+def reset_notes():
     for i in range(16):
         midi.send(NoteOff(36 + i, 120))
 
@@ -180,7 +181,7 @@ def reset():
     pattern = [[False] * 16 for _ in range(16)]
 
 
-def updateLEDs():
+def update_leds():
     if button_mode == ButtonMode.PATTERN:
         for i in range(16):
             is_armed = pattern[note][i]
@@ -197,12 +198,11 @@ def updateLEDs():
 
 
 # midi panic for script reloading
-resetNotes()
+reset_notes()
 
 # main loop
 while True:
     stopNotes(step)
     step = (step + 1) % 16
-    updateLEDs
     playNotes(step)
     wait(0.125)
