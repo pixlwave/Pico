@@ -1,4 +1,5 @@
 # usb midi step sequencer for raspberry pi pico
+# works with the pimoroni rgb keypad
 # written for circuitpython v6.2.0
 # requires the following libs:
 # - adafruit_bus_device
