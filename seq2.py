@@ -65,7 +65,7 @@ class Color:
     OFF = (0, 0, 0)
 
 
-def halfColor(color):
+def dim_color(color):
     return tuple([int(0.1 * value) for value in color])
 
 
@@ -78,7 +78,7 @@ note_colors = [Color.KICK, Color.SNARE, Color.SNARE, Color.CLAP,
                Color.SNARE, Color.TOM, Color.HIHAT, Color.TOM,
                Color.HIHAT, Color.TOM, Color.HIHAT, Color.TOM,
                Color.TOM, Color.CYMBOL, Color.TOM, Color.CYMBOL]
-note_dimmed_colors = [halfColor(color) for color in note_colors]
+note_dimmed_colors = [dim_color(color) for color in note_colors]
 dim_notes = [False] * 16
 
 button_mode = ButtonMode.PATTERN
@@ -119,19 +119,19 @@ def wait(delay):
             for i in range(16):
                 if button_states[i] == 1 and last_button_states[i] == 0:
                     last_button_pressed_times[i] = now
-                    buttonPress(i, ButtonState.PRESSED, now)
+                    button_press(i, ButtonState.PRESSED, now)
                 elif button_states[i] == 1:
                     if last_button_pressed_times[i] + 0.5 < now:
-                        buttonPress(i, ButtonState.LONGPRESSED, now)
+                        button_press(i, ButtonState.LONGPRESSED, now)
                 elif button_states[i] == 0 and last_button_states[i] == 1:
-                    buttonPress(i, ButtonState.RELEASED, now)
+                    button_press(i, ButtonState.RELEASED, now)
                     last_button_pressed_times[i] = None
         
         last_button_states = button_states
         time.sleep(0.001)
 
 
-def buttonPress(index, state, time):
+def button_press(index, state):
     global note
     global pattern
     global button_mode
@@ -156,13 +156,13 @@ def buttonPress(index, state, time):
                 pattern[note][index] = not pattern[note][index]
 
 
-def playNotes(step):
+def play_notes(step):
     for i in range(16):
         if pattern[i][step]:
             midi.send(NoteOn(36 + i, 120))
 
 
-def stopNotes(step):
+def stop_notes(step):
     for i in range(16):
         if pattern[i][step]:
             midi.send(NoteOff(36 + i, 120))
@@ -202,7 +202,7 @@ reset_notes()
 
 # main loop
 while True:
-    stopNotes(step)
+    stop_notes(step)
     step = (step + 1) % 16
-    playNotes(step)
+    play_notes(step)
     wait(0.125)
