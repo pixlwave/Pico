@@ -119,7 +119,7 @@ def wait(delay):
             for i in range(16):
                 if button_states[i] == 1 and last_button_states[i] == 0:
                     last_button_pressed_times[i] = now
-                    button_press(i, ButtonState.PRESSED, now)
+                    button_press(i, ButtonState.PRESSED)
                 elif button_states[i] == 1:
                     if last_button_pressed_times[i] + 0.5 < now:
                         button_press(i, ButtonState.LONGPRESSED, now)
