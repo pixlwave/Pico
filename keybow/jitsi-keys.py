@@ -48,18 +48,18 @@ keymap = [
 # the key colours in order
 rgb = [
     (255, 127, 0),    # push to talk
-    (255, 127, 127),  # focus on person 3
-    (255, 127, 127),  # focus on me
+    (255, 63, 63),    # focus on person 3
+    (255, 63, 63),    # focus on me
     (0, 255, 0),      # toggle mic
     
-    (127, 0, 255),    # call quality
-    (255, 127, 127),  # focus on person
-    (255, 127, 127),  # focus on person
+    (63, 255, 63),     # call quality
+    (255, 63, 63),    # focus on person
+    (255, 63, 63),    # focus on person
     (255, 0, 0),      # toggle video
     
-    (64, 64, 64),     # speaker stats
-    (255, 127, 127),  # focus on person 5
-    (255, 127, 127),  # focus on person 2
+    (63, 255, 63),    # speaker stats
+    (255, 63, 63),    # focus on person 5
+    (255, 63, 63),    # focus on person 2
     (0, 255, 255),    # screen sharing
     
     (0, 0, 255),      # full screen
