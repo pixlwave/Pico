@@ -12,6 +12,7 @@ from adafruit_midi.note_off import NoteOff
 from adafruit_midi.note_on import NoteOn
 from adafruit_midi.start import Start
 from adafruit_midi.stop import Stop
+from adafruit_midi.midi_continue import Continue
 
 
 class Color:
@@ -45,8 +46,8 @@ keymap = [
 ]
 velocity = 127
 
-# the key colours in order
-rgb = [
+# the key colours in order for Jitsi
+rgbMainLayer = [
     Color.YELLOW,     # reaction - clap
     Color.YELLOW,     # reaction - laugh
     Color.YELLOW,     # reaction - thumbs up
@@ -68,14 +69,40 @@ rgb = [
     Color.WHITE       # special key
 ]
 
+# the key colours in order for Element
+rgbSecondaryLayer = [
+    Color.OFF,        # unused
+    Color.OFF,        # unused
+    Color.OFF,        # unused
+    Color.MINT,       # function #1
+    
+    Color.GREEN,      # toggle video
+    Color.OFF,        # unused
+    Color.OFF,        # unused
+    Color.MINT,       # function #2
+    
+    Color.ORANGE,     # toggle mic
+    Color.OFF,        # unused
+    Color.OFF,        # unused
+    Color.MINT,       # function #3
+    
+    Color.OFF,        # unused
+    Color.OFF,        # unused
+    Color.BLUE,       # end call
+    Color.WHITE       # special key
+]
+
+rgb = [rgbMainLayer, rgbSecondaryLayer]
+
 isActive = False
+layer = 0
 
 
 def color_for_key(key):
     if isActive:
-        return rgb[key.number]
+        return rgb[layer][key.number]
     else:
-        return (0, 0, 0)
+        return Color.OFF
 
 
 # attach handlers to keys
@@ -108,7 +135,13 @@ while True:
     message = midi.receive()
     
     if type(message) is Start:
-        if not isActive:
+        if not isActive or not layer == 0:
+            layer = 0
+            isActive = True
+            update_idle_colors()
+    elif type(message) is Continue:
+        if not isActive or not layer == 1:
+            layer = 1
             isActive = True
             update_idle_colors()
     elif type(message) is Stop:
